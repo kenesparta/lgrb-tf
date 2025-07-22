@@ -4,3 +4,4 @@
 .terraform.lock.hcl
 *.plan
 *.tfplan
+.idea

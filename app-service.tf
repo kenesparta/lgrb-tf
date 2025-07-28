@@ -33,7 +33,7 @@ resource "aws_ecs_service" "app_service" {
   cluster         = aws_ecs_cluster.lgr_service_cluster.id
   name            = "app-service"
   launch_type     = "FARGATE"
-  desired_count   = 3
+  desired_count   = 1
   task_definition = aws_ecs_task_definition.app_service.arn
 
   network_configuration {

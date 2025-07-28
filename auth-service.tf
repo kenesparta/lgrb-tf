@@ -27,7 +27,7 @@ resource "aws_ecs_service" "auth_service" {
   cluster         = aws_ecs_cluster.lgr_service_cluster.id
   name            = "auth-service"
   launch_type     = "FARGATE"
-  desired_count   = 3
+  desired_count   = 1
   task_definition = aws_ecs_task_definition.auth_service.arn
 
   network_configuration {

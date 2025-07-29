@@ -1,3 +1,7 @@
+locals {
+  rest_port = 8000
+}
+
 resource "aws_ecs_task_definition" "app_service" {
   family                   = "app-service"
   network_mode             = "awsvpc"
@@ -16,7 +20,7 @@ resource "aws_ecs_task_definition" "app_service" {
       essential = true,
       portMappings = [
         {
-          containerPort = 8000
+          containerPort = local.rest_port
         }
       ],
       environment = [
@@ -49,7 +53,7 @@ resource "aws_ecs_service" "app_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.app_service_tg.arn
     container_name   = "app-service"
-    container_port   = 8000
+    container_port   = local.rest_port
   }
 
   depends_on = [aws_lb_listener.app_https_listener]
@@ -88,8 +92,8 @@ resource "aws_security_group" "app_ecs_task_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = 8000
-    to_port         = 8000
+    from_port       = local.rest_port
+    to_port         = local.rest_port
     protocol        = "tcp"
     security_groups = [aws_security_group.lgr_app_service_sg.id]
   }
@@ -145,7 +149,7 @@ resource "aws_lb_listener" "app_http_listener" {
 
 resource "aws_lb_target_group" "app_service_tg" {
   name        = "app-service-tg"
-  port        = 8000
+  port        = local.rest_port
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"

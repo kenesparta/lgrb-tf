@@ -25,3 +25,15 @@ resource "aws_route53_record" "auth_service" {
     evaluate_target_health = true
   }
 }
+
+resource "aws_route53_record" "grpc_service" {
+  zone_id = data.aws_route53_zone.main.zone_id
+  name    = "grpc.${var.main_dns}"
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.auth_service_alb.dns_name
+    zone_id                = aws_lb.auth_service_alb.zone_id
+    evaluate_target_health = true
+  }
+}

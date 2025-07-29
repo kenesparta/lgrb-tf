@@ -1,5 +1,5 @@
 locals {
-  rest_port = 8000
+  app_rest_port = 8000
 }
 
 resource "aws_ecs_task_definition" "app_service" {
@@ -20,13 +20,17 @@ resource "aws_ecs_task_definition" "app_service" {
       essential = true,
       portMappings = [
         {
-          containerPort = local.rest_port
+          containerPort = local.app_rest_port
         }
       ],
       environment = [
         {
           name  = "AUTH_SERVICE_HOST"
           value = "https://auth.${var.main_dns}"
+        },
+        {
+          name  = "GRPC_AUTH_SERVICE_HOST"
+          value = "auth-service-gRPC.${local.internal_dns_api}"
         }
       ]
     }
@@ -53,7 +57,7 @@ resource "aws_ecs_service" "app_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.app_service_tg.arn
     container_name   = "app-service"
-    container_port   = local.rest_port
+    container_port   = local.app_rest_port
   }
 
   depends_on = [aws_lb_listener.app_https_listener]
@@ -92,8 +96,8 @@ resource "aws_security_group" "app_ecs_task_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    from_port       = local.rest_port
-    to_port         = local.rest_port
+    from_port       = local.app_rest_port
+    to_port         = local.app_rest_port
     protocol        = "tcp"
     security_groups = [aws_security_group.lgr_app_service_sg.id]
   }
@@ -107,15 +111,21 @@ resource "aws_security_group" "app_ecs_task_sg" {
 }
 
 resource "aws_lb" "app_service_alb" {
-  name               = "app-service-alb"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.lgr_app_service_sg.id]
+  name                       = "app-service-alb"
+  internal                   = false
+  load_balancer_type         = "application"
+  security_groups            = [aws_security_group.lgr_app_service_sg.id]
+  enable_deletion_protection = false
   subnets = [
     aws_subnet.public_1.id,
     aws_subnet.public_2.id,
     aws_subnet.public_3.id,
   ]
+  tags = {
+    Name    = "app-lb"
+    Project = var.project
+    Owner   = var.owner
+  }
 }
 
 resource "aws_lb_listener" "app_https_listener" {
@@ -149,7 +159,7 @@ resource "aws_lb_listener" "app_http_listener" {
 
 resource "aws_lb_target_group" "app_service_tg" {
   name        = "app-service-tg"
-  port        = local.rest_port
+  port        = local.app_rest_port
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"

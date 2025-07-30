@@ -30,9 +30,20 @@ resource "aws_ecs_task_definition" "app_service" {
         },
         {
           name  = "GRPC_AUTH_SERVICE_HOST"
-          value = "auth-service-gRPC.${local.internal_dns_api}"
+          # TODO: Should be an internal DNS, not external to be more fast
+          value = "https://grpc.${var.main_dns}"
+          # value = "http://${aws_service_discovery_service.auth_discovery.name}.${local.internal_dns_api}:${local.auth_grpc_port}"
         }
-      ]
+      ],
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.app_service_logs.name
+          awslogs-region        = var.region
+          awslogs-stream-prefix = "ecs-app"
+        }
+      }
     }
   ])
 }
@@ -173,5 +184,14 @@ resource "aws_lb_target_group" "app_service_tg" {
     path                = "/health-check"
     matcher             = "200"
     protocol            = "HTTP"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "app_service_logs" {
+  name              = "/ecs/app-service"
+  retention_in_days = 1
+
+  tags = {
+    Name = "app-logs"
   }
 }

@@ -162,6 +162,7 @@ resource "aws_security_group" "auth_ecs_task_sg" {
     security_groups = [
       aws_security_group.lgr_auth_service_sg.id,
       aws_security_group.app_ecs_task_sg.id,
+      aws_security_group.lgr_app_service_sg.id,
     ]
   }
 

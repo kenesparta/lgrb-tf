@@ -25,7 +25,15 @@ resource "aws_ecs_task_definition" "auth_service_restAPI" {
           containerPort = local.auth_rest_port
           protocol      = "tcp"
         }
-      ]
+      ],
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.auth_service_restAPI_logs
+          awslogs-region        = var.region
+          awslogs-stream-prefix = "ecs-auth-restAPI"
+        }
+      }
     }
   ])
 }
@@ -51,7 +59,15 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
           containerPort = local.auth_grpc_port
           protocol      = "tcp"
         }
-      ]
+      ],
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.auth_service_gRPC_logs
+          awslogs-region        = var.region
+          awslogs-stream-prefix = "ecs-auth-gRPC"
+        }
+      }
     }
   ])
 }
@@ -323,5 +339,23 @@ resource "aws_service_discovery_service" "auth_discovery" {
 
   health_check_custom_config {
     failure_threshold = 1
+  }
+}
+
+resource "aws_cloudwatch_log_group" "auth_service_restAPI_logs" {
+  name              = "/ecs/aut-service-restAPI"
+  retention_in_days = 1
+
+  tags = {
+    Name = "auth-restAPI-logs"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "auth_service_gRPC_logs" {
+  name              = "/ecs/aut-service-gRPC"
+  retention_in_days = 1
+
+  tags = {
+    Name = "auth-gRPC-logs"
   }
 }

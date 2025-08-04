@@ -60,6 +60,12 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
           protocol      = "tcp"
         }
       ],
+      secrets = [
+        {
+          name  = "JWT_SECRET"
+          value = var.jwt_secret
+        }
+      ],
       logConfiguration = {
         logDriver = "awslogs"
         options = {

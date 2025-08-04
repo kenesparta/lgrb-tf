@@ -35,7 +35,6 @@ resource "aws_ecs_task_definition" "app_service" {
           value = "https://grpc.${var.main_dns}"
         }
       ],
-
       logConfiguration = {
         logDriver = "awslogs"
         options = {

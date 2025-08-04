@@ -21,3 +21,7 @@ variable "owner" {
 variable "main_dns" {
   type = string
 }
+
+variable "jwt_secret" {
+  type = string
+}

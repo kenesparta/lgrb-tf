@@ -25,3 +25,11 @@ variable "main_dns" {
 variable "jwt_secret" {
   type = string
 }
+
+variable "captcha_site_key" {
+  type = string
+}
+
+variable "captcha_secret_key" {
+  type = string
+}

@@ -4,6 +4,13 @@ locals {
   internal_dns_api = "auth-service.local"
 }
 
+resource "aws_ssm_parameter" "jwt_secret" {
+  name        = "/auth-service/jwt_secret"
+  description = "JWT secret for auth-service"
+  type        = "SecureString"
+  value       = var.jwt_secret
+}
+
 resource "aws_ecs_task_definition" "auth_service_restAPI" {
   family                   = "auth-service-restAPI"
   network_mode             = "awsvpc"
@@ -23,14 +30,25 @@ resource "aws_ecs_task_definition" "auth_service_restAPI" {
       portMappings = [
         {
           containerPort = local.auth_rest_port
-          protocol      = "tcp"
+        }
+      ],
+      environment = [
+        {
+          name  = "COOKIE_SUBDOMAIN"
+          value = ".${var.main_dns}"
+        }
+      ],
+      secrets = [
+        {
+          name      = "JWT_SECRET"
+          valueFrom = aws_ssm_parameter.jwt_secret.arn
         }
       ],
       logConfiguration = {
-        logDriver = "awslogs"
+        logDriver = "awslogs",
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.auth_service_restAPI_logs
-          awslogs-region        = var.region
+          awslogs-group         = aws_cloudwatch_log_group.auth_service_restAPI_logs.name,
+          awslogs-region        = var.region,
           awslogs-stream-prefix = "ecs-auth-restAPI"
         }
       }
@@ -57,19 +75,24 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
       portMappings = [
         {
           containerPort = local.auth_grpc_port
-          protocol      = "tcp"
+        }
+      ],
+      environment = [
+        {
+          name  = "COOKIE_SUBDOMAIN"
+          value = ".${var.main_dns}"
         }
       ],
       secrets = [
         {
-          name  = "JWT_SECRET"
-          value = var.jwt_secret
+          name      = "JWT_SECRET"
+          valueFrom = aws_ssm_parameter.jwt_secret.arn
         }
       ],
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          awslogs-group         = aws_cloudwatch_log_group.auth_service_gRPC_logs
+          awslogs-group         = aws_cloudwatch_log_group.auth_service_gRPC_logs.name
           awslogs-region        = var.region
           awslogs-stream-prefix = "ecs-auth-gRPC"
         }
@@ -349,7 +372,7 @@ resource "aws_service_discovery_service" "auth_discovery" {
 }
 
 resource "aws_cloudwatch_log_group" "auth_service_restAPI_logs" {
-  name              = "/ecs/aut-service-restAPI"
+  name              = "/ecs/auth-service-restAPI"
   retention_in_days = 1
 
   tags = {
@@ -358,7 +381,7 @@ resource "aws_cloudwatch_log_group" "auth_service_restAPI_logs" {
 }
 
 resource "aws_cloudwatch_log_group" "auth_service_gRPC_logs" {
-  name              = "/ecs/aut-service-gRPC"
+  name              = "/ecs/auth-service-gRPC"
   retention_in_days = 1
 
   tags = {

@@ -34,8 +34,12 @@ resource "aws_ecs_task_definition" "auth_service_restAPI" {
       ],
       environment = [
         {
-          name  = "COOKIE_SUBDOMAIN"
+          name  = "COOKIE_DOMAIN"
           value = ".${var.main_dns}"
+        },
+        {
+          name  = "CORS_ALLOWED_ORIGINS"
+          value = "https://app.${var.main_dns},http://app.${var.main_dns},https://${var.main_dns},http://${var.main_dns}"
         }
       ],
       secrets = [
@@ -79,8 +83,12 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
       ],
       environment = [
         {
-          name  = "COOKIE_SUBDOMAIN"
+          name  = "COOKIE_DOMAIN"
           value = ".${var.main_dns}"
+        },
+        {
+          name  = "CORS_ALLOWED_ORIGINS"
+          value = "https://app.${var.main_dns}"
         }
       ],
       secrets = [

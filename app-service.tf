@@ -46,7 +46,7 @@ resource "aws_ecs_task_definition" "app_service" {
           name = "GRPC_AUTH_SERVICE_HOST"
           # TODO: Should be an internal DNS, not external to be more fast
           # value = "http://${aws_service_discovery_service.auth_discovery.name}.${local.internal_dns_api}:${local.auth_grpc_port}"
-          value = "http://grpc.${var.main_dns}:443"
+          value = "https://grpc.${var.main_dns}"
         }
       ],
       secrets = [

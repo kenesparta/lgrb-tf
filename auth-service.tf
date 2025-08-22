@@ -11,6 +11,27 @@ resource "aws_ssm_parameter" "jwt_secret" {
   value       = var.jwt_secret
 }
 
+resource "aws_ssm_parameter" "captcha_site_key" {
+  name        = "/app-service/captcha_site_key"
+  description = "Captcha site key"
+  type        = "SecureString"
+  value       = var.captcha_site_key
+}
+
+resource "aws_ssm_parameter" "captcha_secret_key" {
+  name        = "/app-service/captcha_secret_key"
+  description = "Captcha secret key"
+  type        = "SecureString"
+  value       = var.captcha_secret_key
+}
+
+resource "aws_ssm_parameter" "postgres_pasword" {
+  name        = "/app-service/postgres_pasword"
+  description = "PostgresSQL password"
+  type        = "SecureString"
+  value       = var.database_password
+}
+
 resource "aws_ecs_task_definition" "auth_service_restAPI" {
   family                   = "auth-service-restAPI"
   network_mode             = "awsvpc"
@@ -40,12 +61,36 @@ resource "aws_ecs_task_definition" "auth_service_restAPI" {
         {
           name  = "CORS_ALLOWED_ORIGINS"
           value = "https://app.${var.main_dns},http://app.${var.main_dns},https://${var.main_dns},http://${var.main_dns}"
+        },
+        {
+          name  = "SQLX_OFFLINE"
+          value = "true"
+        },
+        {
+          name  = "REDIS_HOST_NAME"
+          value = "aws_elasticache_replication_group.redis.primary_endpoint_address"
         }
       ],
       secrets = [
         {
           name      = "JWT_SECRET"
           valueFrom = aws_ssm_parameter.jwt_secret.arn
+        },
+        {
+          name      = "CAPTCHA_SITE_KEY"
+          valueFrom = aws_ssm_parameter.captcha_site_key.arn
+        },
+        {
+          name      = "CAPTCHA_SECRET_KEY"
+          valueFrom = var.captcha_secret_key
+        },
+        {
+          name      = "DATABASE_URL"
+          valueFrom = aws_ssm_parameter.database_url_rds.arn
+        },
+        {
+          name      = "POSTGRES_PASSWORD"
+          valueFrom = aws_ssm_parameter.postgres_pasword.arn
         }
       ],
       logConfiguration = {
@@ -89,12 +134,36 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
         {
           name  = "CORS_ALLOWED_ORIGINS"
           value = "https://app.${var.main_dns}"
+        },
+        {
+          name  = "SQLX_OFFLINE"
+          value = "true"
+        },
+        {
+          name  = "REDIS_HOST_NAME"
+          value = "aws_elasticache_replication_group.redis.primary_endpoint_address"
         }
       ],
       secrets = [
         {
           name      = "JWT_SECRET"
           valueFrom = aws_ssm_parameter.jwt_secret.arn
+        },
+        {
+          name      = "CAPTCHA_SITE_KEY"
+          valueFrom = aws_ssm_parameter.captcha_site_key.arn
+        },
+        {
+          name      = "CAPTCHA_SECRET_KEY"
+          valueFrom = var.captcha_secret_key
+        },
+        {
+          name      = "DATABASE_URL"
+          valueFrom = aws_ssm_parameter.database_url_rds.arn
+        },
+        {
+          name      = "POSTGRES_PASSWORD"
+          valueFrom = aws_ssm_parameter.postgres_pasword.arn
         }
       ],
       logConfiguration = {

@@ -41,6 +41,8 @@ resource "aws_iam_policy" "ecs_ssm_access" {
           aws_ssm_parameter.jwt_secret.arn,
           aws_ssm_parameter.captcha_site_key.arn,
           aws_ssm_parameter.captcha_secret_key.arn,
+          aws_ssm_parameter.database_url_rds.arn,
+          aws_ssm_parameter.postgres_pasword.arn,
         ]
       }
     ]
@@ -50,4 +52,31 @@ resource "aws_iam_policy" "ecs_ssm_access" {
 resource "aws_iam_role_policy_attachment" "ecs_ssm_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.ecs_ssm_access.arn
+}
+
+resource "aws_iam_policy" "ecs_s3_access_policy" {
+  name        = "ecs-task-s3-access-policy"
+  description = "Allows ECS tasks to access private S3 bucket"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ],
+        Resource = [
+          aws_s3_bucket.private_app_bucket.arn,
+          "${aws_s3_bucket.private_app_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_s3_policy_attachment" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.ecs_s3_access_policy.arn
 }

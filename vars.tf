@@ -33,3 +33,11 @@ variable "captcha_site_key" {
 variable "captcha_secret_key" {
   type = string
 }
+
+variable "database_user" {
+  type = string
+}
+
+variable "database_password" {
+  type = string
+}

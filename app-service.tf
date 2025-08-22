@@ -2,20 +2,6 @@ locals {
   app_rest_port = 8000
 }
 
-resource "aws_ssm_parameter" "captcha_site_key" {
-  name        = "/app-service/captcha_site_key"
-  description = "JWT secret for auth-service"
-  type        = "SecureString"
-  value       = var.captcha_site_key
-}
-
-resource "aws_ssm_parameter" "captcha_secret_key" {
-  name        = "/app-service/captcha_secret_key"
-  description = "JWT secret for auth-service"
-  type        = "SecureString"
-  value       = var.captcha_secret_key
-}
-
 resource "aws_ecs_task_definition" "app_service" {
   family                   = "app-service"
   network_mode             = "awsvpc"
@@ -44,21 +30,12 @@ resource "aws_ecs_task_definition" "app_service" {
         },
         {
           name = "GRPC_AUTH_SERVICE_HOST"
-          # TODO: Should be an internal DNS, not external to be more fast
+          # TODO: Should be an internal DNS using service discovery
           # value = "http://${aws_service_discovery_service.auth_discovery.name}.${local.internal_dns_api}:${local.auth_grpc_port}"
           value = "https://grpc.${var.main_dns}"
         }
       ],
-      secrets = [
-        {
-          name      = "CAPTCHA_SITE_KEY"
-          valueFrom = aws_ssm_parameter.captcha_site_key.arn
-        },
-        {
-          name      = "CAPTCHA_SECRET_KEY"
-          valueFrom = aws_ssm_parameter.captcha_secret_key.arn
-        }
-      ],
+      secrets = [],
       logConfiguration = {
         logDriver = "awslogs"
         options = {

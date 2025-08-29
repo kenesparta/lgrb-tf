@@ -55,11 +55,11 @@ resource "aws_ecs_task_definition" "auth_service_restAPI" {
       ],
       environment = [
         {
-          name  = "COOKIE_DOMAIN"
+          name  = "AUTH_LGRB_COOKIE_DOMAIN"
           value = ".${var.main_dns}"
         },
         {
-          name  = "CORS_ALLOWED_ORIGINS"
+          name  = "AUTH_LGRB_CORS_ALLOWED_ORIGINS"
           value = "https://app.${var.main_dns},http://app.${var.main_dns},https://${var.main_dns},http://${var.main_dns}"
         },
         {
@@ -67,29 +67,29 @@ resource "aws_ecs_task_definition" "auth_service_restAPI" {
           value = "true"
         },
         {
-          name  = "REDIS_HOST_NAME"
-          value = "aws_elasticache_replication_group.redis.primary_endpoint_address"
+          name  = "AUTH_LGRB_REDIS_HOST_NAME"
+          value = aws_elasticache_replication_group.redis.primary_endpoint_address
         }
       ],
       secrets = [
         {
-          name      = "JWT_SECRET"
+          name      = "AUTH_LGRB_JWT_SECRET"
           valueFrom = aws_ssm_parameter.jwt_secret.arn
         },
         {
-          name      = "CAPTCHA_SITE_KEY"
+          name      = "AUTH_LGRB_CAPTCHA_SITE_KEY"
           valueFrom = aws_ssm_parameter.captcha_site_key.arn
         },
         {
-          name      = "CAPTCHA_SECRET_KEY"
-          valueFrom = var.captcha_secret_key
+          name      = "AUTH_LGRB_CAPTCHA_SECRET_KEY"
+          valueFrom = aws_ssm_parameter.captcha_secret_key.arn
         },
         {
-          name      = "DATABASE_URL"
+          name      = "AUTH_LGRB_DATABASE_URL"
           valueFrom = aws_ssm_parameter.database_url_rds.arn
         },
         {
-          name      = "POSTGRES_PASSWORD"
+          name      = "AUTH_LGRB_POSTGRES_PASSWORD"
           valueFrom = aws_ssm_parameter.postgres_pasword.arn
         }
       ],
@@ -128,11 +128,11 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
       ],
       environment = [
         {
-          name  = "COOKIE_DOMAIN"
+          name  = "AUTH_LGRB_COOKIE_DOMAIN"
           value = ".${var.main_dns}"
         },
         {
-          name  = "CORS_ALLOWED_ORIGINS"
+          name  = "AUTH_LGRB_CORS_ALLOWED_ORIGINS"
           value = "https://app.${var.main_dns}"
         },
         {
@@ -140,29 +140,29 @@ resource "aws_ecs_task_definition" "auth_service_gRPC" {
           value = "true"
         },
         {
-          name  = "REDIS_HOST_NAME"
-          value = "aws_elasticache_replication_group.redis.primary_endpoint_address"
+          name  = "AUTH_LGRB_REDIS_HOST_NAME"
+          value = aws_elasticache_replication_group.redis.primary_endpoint_address
         }
       ],
       secrets = [
         {
-          name      = "JWT_SECRET"
+          name      = "AUTH_LGRB_JWT_SECRET"
           valueFrom = aws_ssm_parameter.jwt_secret.arn
         },
         {
-          name      = "CAPTCHA_SITE_KEY"
+          name      = "AUTH_LGRB_CAPTCHA_SITE_KEY"
           valueFrom = aws_ssm_parameter.captcha_site_key.arn
         },
         {
-          name      = "CAPTCHA_SECRET_KEY"
-          valueFrom = var.captcha_secret_key
+          name      = "AUTH_LGRB_CAPTCHA_SECRET_KEY"
+          valueFrom = aws_ssm_parameter.captcha_secret_key.arn
         },
         {
-          name      = "DATABASE_URL"
+          name      = "AUTH_LGRB_DATABASE_URL"
           valueFrom = aws_ssm_parameter.database_url_rds.arn
         },
         {
-          name      = "POSTGRES_PASSWORD"
+          name      = "AUTH_LGRB_POSTGRES_PASSWORD"
           valueFrom = aws_ssm_parameter.postgres_pasword.arn
         }
       ],
